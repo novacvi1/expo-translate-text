@@ -1,9 +1,20 @@
+export type TranslationEngine = 'apple' | 'mlkit';
+
 export interface TranslationTaskRequest {
   input: string[] | { [key: string]: string | string[] } | string;
   sourceLangCode?: string;
   targetLangCode?: string;
   requireCharging?: boolean;
   requiresWifi?: boolean;
+  /**
+   * iOS only. Selects the translation backend.
+   *  - 'apple' (default): Apple Translation framework, iOS 18+.
+   *  - 'mlkit': Google ML Kit, available on iOS 15.5+ — same engine and
+   *    supported language list as Android.
+   *
+   * Ignored on Android (ML Kit is always used there).
+   */
+  engine?: TranslationEngine;
 }
 
 export interface TranslationTaskResult {
@@ -37,7 +48,7 @@ export type TranslationErrorCode =
   | 'UNKNOWN_ERROR';
 
 export interface ExpoTranslateTextModule {
-  isTranslationSupported(): boolean;
+  isTranslationSupported(engine?: TranslationEngine): boolean;
 
   translateTask(params: TranslationTaskRequest): Promise<BatchTranslationTaskResult>;
 

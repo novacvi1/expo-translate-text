@@ -11,11 +11,18 @@ public class ExpoTranslateTextModule: Module {
     public func definition() -> ModuleDefinition {
         Name("ExpoTranslateText")
 
-        Function("isTranslationSupported") { () -> Bool in
-            if #available(iOS 18.0, *) {
+        Function("isTranslationSupported") { (engine: String?) -> Bool in
+            switch engine {
+            case "mlkit":
+                // ML Kit Translate 8.0 requires iOS 15.5+, which is the
+                // module's deployment target — so the OS check is implicit.
                 return true
+            default:
+                if #available(iOS 18.0, *) {
+                    return true
+                }
+                return false
             }
-            return false
         }
 
         AsyncFunction("translateSheet") {
@@ -78,6 +85,10 @@ public class ExpoTranslateTextModule: Module {
                     code: 0,
                     userInfo: [NSLocalizedDescriptionKey: "Module deallocated"]
                 )
+            }
+
+            if (params["engine"] as? String) == "mlkit" {
+                return try await MLKitTranslator.translate(params: params)
             }
 
             let (texts, inputType, dictMapping) = parseTexts(from: params)

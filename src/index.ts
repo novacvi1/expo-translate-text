@@ -1,14 +1,20 @@
 import { Platform } from 'react-native';
 
-import {
+import type {
   TranslationErrorCode,
   TranslationSheetRequest,
   TranslationTaskRequest,
   TranslationTaskResult,
 } from './ExpoTranslateText.types';
-import { translateTask, translateSheet, TranslationError, isTranslationSupported } from './ExpoTranslateTextModule';
+import {
+  isTranslationSupported,
+  translateSheet,
+  translateTask,
+  TranslationError,
+} from './ExpoTranslateTextModule';
 
-export { TranslationError, TranslationErrorCode, isTranslationSupported };
+export type { TranslationEngine, TranslationErrorCode } from './ExpoTranslateText.types';
+export { isTranslationSupported, TranslationError };
 
 // iOS uses numeric codes, Android uses string codes
 // Map both to our unified TranslationErrorCode
@@ -51,6 +57,7 @@ export const onTranslateTask = async ({
   targetLangCode,
   requireCharging,
   requiresWifi,
+  engine,
 }: TranslationTaskRequest): Promise<TranslationTaskResult> => {
   try {
     return await translateTask({
@@ -59,6 +66,7 @@ export const onTranslateTask = async ({
       targetLangCode,
       requiresWifi,
       requireCharging,
+      engine,
     });
   } catch (error: unknown) {
     const errorCode = extractErrorCode(error);

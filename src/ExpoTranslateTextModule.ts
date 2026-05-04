@@ -1,5 +1,9 @@
 import { requireNativeModule } from 'expo-modules-core';
-import { ExpoTranslateTextModule, TranslationErrorCode, TranslationTaskRequest } from './ExpoTranslateText.types';
+import {
+  ExpoTranslateTextModule,
+  TranslationErrorCode,
+  TranslationTaskRequest,
+} from './ExpoTranslateText.types';
 import { Platform } from 'react-native';
 
 export class TranslationError extends Error {
@@ -29,4 +33,13 @@ export const translateTask = (params: TranslationTaskRequest) => {
   return ExpoTranslateText.translateTask(params);
 };
 export const translateSheet = ExpoTranslateText.translateSheet;
-export const isTranslationSupported = ExpoTranslateText.isTranslationSupported;
+
+export const isTranslationSupported = (engine?: 'apple' | 'mlkit'): boolean => {
+  if (Platform.OS === 'android') {
+    // Apple Translation framework is iOS-only; ML Kit (or unspecified) defers
+    // to the native check (Play Services availability).
+    if (engine === 'apple') return false;
+    return (ExpoTranslateText as any).isTranslationSupported();
+  }
+  return (ExpoTranslateText as any).isTranslationSupported(engine);
+};

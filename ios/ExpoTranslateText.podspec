@@ -11,14 +11,16 @@ Pod::Spec.new do |s|
   s.author         = package['author']
   s.homepage       = package['homepage']
   s.platforms      = {
-    :ios => '15.1',
-    :tvos => '15.1'
+    :ios => '15.5',
+    :tvos => '15.5'
   }
   s.swift_version  = '5.4'
   s.source         = { git: 'https://github.com/TomAtterton/expo-translate-text' }
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'
+  s.dependency 'GoogleMLKit/Translate', '8.0.0'
+  s.dependency 'GoogleMLKit/LanguageID', '8.0.0'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
