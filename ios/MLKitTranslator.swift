@@ -4,6 +4,18 @@ import MLKitLanguageID
 import MLKitCommon
 
 enum MLKitTranslator {
+    /// Maps a BCP-47 language tag to an ML Kit `TranslateLanguage`, or nil
+    /// if the tag is not supported. ML Kit's iOS SDK does not expose a
+    /// `fromLanguageTag` helper (that's the Android API), so we go through
+    /// the non-failable `init(rawValue:)` and verify membership against
+    /// `allLanguages()`. Region subtags ("en-US") are stripped — ML Kit
+    /// only models base languages.
+    private static func translateLanguage(for tag: String) -> TranslateLanguage? {
+        let base = tag.lowercased().split(separator: "-").first.map(String.init) ?? tag.lowercased()
+        let lang = TranslateLanguage(rawValue: base)
+        return TranslateLanguage.allLanguages().contains(lang) ? lang : nil
+    }
+
     static func translate(params: [String: Any]) async throws -> [String: Any] {
         let (texts, inputType, dictMapping) = parseTexts(from: params)
         guard !texts.isEmpty else {
@@ -19,7 +31,7 @@ enum MLKitTranslator {
         let sourceCode: String? = (rawSourceCode == "auto") ? nil : rawSourceCode
         let requiresWifi = params["requiresWifi"] as? Bool ?? false
 
-        guard let target = TranslateLanguage.fromLanguageTag(targetCode) else {
+        guard let target = translateLanguage(for: targetCode) else {
             throw NSError(
                 domain: "ExpoIosTranslateModule",
                 code: 4,
@@ -36,7 +48,7 @@ enum MLKitTranslator {
         var detectedTags: [String] = []
 
         if let code = sourceCode {
-            guard let src = TranslateLanguage.fromLanguageTag(code) else {
+            guard let src = translateLanguage(for: code) else {
                 throw NSError(
                     domain: "ExpoIosTranslateModule",
                     code: 4,
@@ -68,7 +80,7 @@ enum MLKitTranslator {
                     }
                 }
                 let resolvedTag = (tag == "und") ? "en" : tag
-                guard let lang = TranslateLanguage.fromLanguageTag(resolvedTag) else {
+                guard let lang = translateLanguage(for: resolvedTag) else {
                     throw NSError(
                         domain: "ExpoIosTranslateModule",
                         code: 4,
